@@ -1,9 +1,15 @@
 <template>
     <div id="app">
-
+        <navbar placement="top" type="default">
+            <a slot="brand" href="#" title="Sid Commander" class="navbar-brand">Sid Commander</a>
+            <dropdown text="Dropdown">
+                <li><a href="link">Option</a></li>
+            </dropdown>
+        </navbar>
         <div class="container">
             <accordion type="info" :one-at-atime="checked">
-                <panel header={{item.title}} v-for="item in commands">
+                <panel v-for="item in commands">
+                <strong slot="header"><u>{{item.title}}</u></strong>
                     {{item.message}}
                 </panel>
             </accordion>
@@ -12,26 +18,17 @@
 </template>
 
 <script>
-  import {accordion, panel} from 'vue-strap';
+  import {accordion, panel, navbar} from 'vue-strap';
   export default {
 
 
     components: {
-      accordion, panel
+      accordion, panel, navbar
     },
 
     data () {
       return {
-        commands: [
-          {
-            title: 'Command1',
-            message: 'First message'
-          },
-          {
-            title: 'Comand2',
-            message: 'Second message'
-          }
-        ]
+        commands: []
       }
     },
 
