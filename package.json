@@ -28,6 +28,8 @@
     "firebase": "^2.4.1",
     "jquery": "^2.2.2",
     "vue": "^1.0.19",
-    "vue-strap": "^1.1.36"
+    "vue-resource": "^1.2.0",
+    "vue-strap": "^1.1.36",
+    "vue-websocket": "^0.2.2"
   }
 }
