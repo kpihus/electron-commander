@@ -11,14 +11,34 @@
                 <div class="col-md-12">
                     <accordion type="info" :one-at-atime="checked">
                         <panel v-for="item in commands">
-                            <strong slot="header"><u>{{item.title}}</u></strong>
+                            <strong slot="header"><u>{{item.message}}</u></strong>
                             <div class="row">
-                                <div class="col-md-10">
-                                    {{item.message}}
+                                <div class="col-md-12">
+                                    <table class="table">
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Message:</strong></td>
+                                                <td colspan="4"><input type="text" value={{item.message}} size="16" maxlength="16" /> </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Answers</strong></td>
+                                                <td><input type="text" size="4" maxlength="3" value={{item.answers[0]}} /></td>
+                                                <td><input type="text" size="4" maxlength="3" value={{item.answers[1]}} /></td>
+                                                <td><input type="text" size="4" maxlength="3" value={{item.answers[2]}} /></td>
+                                                <td><input type="text" size="4" maxlength="3" value={{item.answers[3]}} /></td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="5">
+                                                    <button class="btn btn-success" @click="sendMessage(item)">Send</button>
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+
                                 </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-success" @click="sendMessage(item.message)">Send</button>
-                                </div>
+
+
                             </div>
 
                         </panel>
@@ -34,12 +54,16 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Status</th>
+                                <th>Last message</th>
+                                <th>Answer</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr v-for="item in clients">
                                 <td>{{item.name}}</td>
                                 <td>{{item.status}}</td>
+                                <td>{{item.message}}</td>
+                                <td>{{item.answer}}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -79,8 +103,11 @@
       console.log('CREATED',); //TODO: REMOVE
       this.getMessages();
       this.$socket.on('clientin', function (clientItem) {
-        clientItem.status= 'Connected';
-        self.clients.push(clientItem);
+        self.clients.push(Object.assign({},clientItem, {
+          status: 'Connected',
+          message: '',
+          answer: ''
+        }));
 
 
       });
@@ -92,6 +119,9 @@
       this.$socket.on('clientack', function(clientId){
         self.setAck(clientId);
       })
+      this.$socket.on('clientresp', function(msg){
+        self.setResp(msg.client, msg.resp)
+      })
     },
 
     methods: {
@@ -102,10 +132,14 @@
             this.$set('commands', response.body)
           })
       },
-      sendMessage(text){
-        console.log('Sending Message', text)
-        this.$socket.emit("message", text);
-        this.setSent();
+      sendMessage(message){
+        var string = message.answers.reduce(function(acc, val){
+          return acc+'|'+val;
+        }, message.message);
+
+        console.log('Sending Message', string)
+        this.$socket.emit("message", string);
+        this.setSent(message.message);
       },
       removeClient(clientId){
        var client = this.clients.find(function(item){
@@ -116,9 +150,18 @@
         this.clients.$remove(client);
 
       },
-      setSent(){
+      setSent(text){
         this.clients.forEach(function (item) {
           item.status = 'Sent'
+          item.message = text
+        })
+      },
+      setResp(client, resp){
+        this.clients.forEach(function (item) {
+          if(item.clientid === client){
+            item.status='Answer'
+            item.answer = resp
+          }
         })
       },
       setAck(clientId){

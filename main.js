@@ -41,11 +41,18 @@ io.on('connection', function (socket) {
   });
   socket.on('ack', function(msg){
 
-    console.log('ACK', msg )
+    console.log('ACK', msg );
     if(master){
       io.to(master).emit('clientack', socket.id);
     }
-  })
+  });
+
+  socket.on('resp', function(msg){
+    console.log('RESPONSE', socket.id, msg)
+    if(master){
+      io.to(master).emit('clientresp', {client: socket.id, resp: msg.resp});
+    }
+  });
 
   socket.on('disconnect', function () {
     if(master){
@@ -64,7 +71,6 @@ let mainWindow;
 function createWindow() {
   mainWindow = new BrowserWindow({width: 1024, height: 800});
   mainWindow.loadURL('file://' + __dirname + '/index.html');
-  mainWindow.webContents.openDevTools();
   mainWindow.on('closed', function () {
     mainWindow = null;
   });
