@@ -62,7 +62,8 @@
           })
       },
       sendMessage(text){
-        console.log(text)
+        console.log('Sending Message',text)
+        this.$socket.emit("message", text);
       }
     }
 
