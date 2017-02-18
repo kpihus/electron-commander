@@ -4,24 +4,59 @@ const BrowserWindow = electron.BrowserWindow;
 const express = require('express');
 const server = new express();
 
+process.on('uncaughtException', function (err) {
+  console.log('===>UNEXPECTED ERROR OCCURRED', err);
+})
+
 var ws = require('http').Server(server);
 
 var io = require('socket.io')(ws);
 let socket;
 
-io.on('connection', function (socketinstance) {
-  console.log('a user connected', socketinstance);
-  socket = socketinstance;
+let master = null;
+
+io.on('connection', function (socket) {
+  if(!master){
+    console.log('MASTER', socket.id); //TODO: REMOVE
+    master = socket.id;
+  }
+  console.log('a user connected', socket.id);
+
+  io.to(socket.id).emit('whoareyou','');
+
   socket.on('message', function (msg) {
     io.emit('message', msg);
     console.log('message: ' + msg);
   });
+
+  socket.on('whoami', function(msg){
+
+    if(msg.clientid === '0'){
+      msg.clientid = socket.id;
+    }
+    console.log('WE HAVE CLIENT', msg )
+    if(master){
+      io.to(master).emit('clientin', msg);
+    }
+  });
+  socket.on('ack', function(msg){
+
+    console.log('ACK', msg )
+    if(master){
+      io.to(master).emit('clientack', socket.id);
+    }
+  })
+
+  socket.on('disconnect', function () {
+    if(master){
+      io.to(master).emit('clientout', socket.id)
+    }
+    console.log('DISCONNECTIION', socket.id)
+  })
 });
 
-if(socket){
-  console.log('We have socjet, set up listener' ); //TODO: REMOVE
 
-}
+
 
 let mainWindow;
 
