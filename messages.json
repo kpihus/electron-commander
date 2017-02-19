@@ -1,12 +1,1 @@
-[
-  {
-    "title": "Command1",
-    "message": "Ammo report",
-    "answers":["0%","33%","66%","99%"]
-  },
-  {
-    "title": "Comand2",
-    "message": "At position",
-    "answers":["yes","no","sos"]
-  }
-]
+[{"title":"Command1","message":"Ammo report","answers":["0%","33%","66%","99%"]},{"title":"Comand2","message":"At position","answers":["yes","no","sos",""]},{"title":"","message":"Enemy report","answers":["vis","fir","sus","nil"]}]

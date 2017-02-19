@@ -2,11 +2,14 @@
     <div id="app">
         <navbar placement="top" type="default">
             <a slot="brand" href="#" title="Sid Commander" class="navbar-brand">Sid Commander</a>
-            <dropdown text="Messages">
-                <li class="menu_item"><span><strong>Add new</strong></span></li>
-            </dropdown>
+
         </navbar>
         <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-2 col-md-offset-10">
+                    <button class="addbtn btn btn-primary" @click="newMessage()">Add New Message</button>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-md-12">
                     <accordion type="info" :one-at-atime="checked">
@@ -18,14 +21,14 @@
                                         <tbody>
                                             <tr>
                                                 <td><strong>Message:</strong></td>
-                                                <td colspan="4"><input type="text" value={{item.message}} size="16" maxlength="16" /> </td>
+                                                <td colspan="4"><input type="text" v-model=item.message size="16" maxlength="16" /> </td>
                                             </tr>
                                             <tr>
                                                 <td><strong>Answers</strong></td>
-                                                <td><input type="text" size="4" maxlength="3" value={{item.answers[0]}} /></td>
-                                                <td><input type="text" size="4" maxlength="3" value={{item.answers[1]}} /></td>
-                                                <td><input type="text" size="4" maxlength="3" value={{item.answers[2]}} /></td>
-                                                <td><input type="text" size="4" maxlength="3" value={{item.answers[3]}} /></td>
+                                                <td><input type="text" size="4" maxlength="3" v-model=item.answers[0] /></td>
+                                                <td><input type="text" size="4" maxlength="3" v-model=item.answers[1] /></td>
+                                                <td><input type="text" size="4" maxlength="3" v-model=item.answers[2] /></td>
+                                                <td><input type="text" size="4" maxlength="3" v-model=item.answers[3] /></td>
                                             </tr>
                                             <tr>
                                                 <td colspan="5">
@@ -37,14 +40,12 @@
                                     </table>
 
                                 </div>
-
-
                             </div>
-
                         </panel>
                     </accordion>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-md-12">
                     <panel>
@@ -77,6 +78,9 @@
     .menu_item {
         cursor: pointer;
         padding: 10px
+    }
+    .addbtn{
+        margin: 5px;
     }
 </style>
 
@@ -132,6 +136,13 @@
             this.$set('commands', response.body)
           })
       },
+      saveMessages(){
+        console.log('Saving messages')
+        this.$http.post('http://localhost:3000/messages', this.commands)
+          .then(function(response){
+            console.log('Messages saved',response);
+          })
+      },
       sendMessage(message){
         var string = message.answers.reduce(function(acc, val){
           return acc+'|'+val;
@@ -140,6 +151,7 @@
         console.log('Sending Message', string)
         this.$socket.emit("message", string);
         this.setSent(message.message);
+        this.saveMessages();
       },
       removeClient(clientId){
        var client = this.clients.find(function(item){
@@ -170,6 +182,11 @@
           if(item.clientid === clientId){
             item.status = 'Received'
           }
+        })
+      },
+      newMessage(){
+        this.commands.push({
+        title: '', message: '', answers: ['','','','']
         })
       }
     }

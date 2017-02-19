@@ -3,10 +3,15 @@ const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const express = require('express');
 const server = new express();
+const bodyparser = require('body-parser');
+const fs = require('fs');
+
 
 process.on('uncaughtException', function (err) {
   console.log('===>UNEXPECTED ERROR OCCURRED', err);
 })
+
+server.use(bodyparser.json())
 
 var ws = require('http').Server(server);
 
@@ -86,6 +91,16 @@ app.on('window-all-closed', function () {
 server.get('/messages', function (req, res) {
   const messages = require('./messages.json');
   res.send(messages);
+});
+server.post('/messages', function (req, res, next) {
+
+  fs.writeFile('./messages.json', JSON.stringify(req.body), function (err) {
+    if (err) return next(err);
+    res.send('file saved')
+  });
+
+
+
 });
 
 server.listen(3000);
