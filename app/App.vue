@@ -175,6 +175,7 @@
         this.clients.forEach(function (item) {
           item.status = 'Sent'
           item.message = text
+          item.answer = ''
         })
       },
       setResp(client, resp){
