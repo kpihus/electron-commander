@@ -31,9 +31,14 @@
                                                 <td><input type="text" size="4" maxlength="3" v-model=item.answers[3] /></td>
                                             </tr>
                                             <tr>
-                                                <td colspan="5">
+                                                <td>
                                                     <button class="btn btn-success" @click="sendMessage(item)">Send</button>
                                                 </td>
+                                                <td colspan="3">&nbsp;</td>
+                                                <td style="text-align: right">
+                                                    <button class="btn btn-danger" @click="deleteMessage(item)">Delete</button>
+                                                </td>
+
                                             </tr>
 
                                         </tbody>
@@ -137,11 +142,15 @@
           })
       },
       saveMessages(){
-        console.log('Saving messages')
+        console.log('Saving messages');
         this.$http.post('http://localhost:3000/messages', this.commands)
           .then(function(response){
             console.log('Messages saved',response);
           })
+      },
+      deleteMessage(item){
+        this.commands.$remove(item);
+        this.saveMessages();
       },
       sendMessage(message){
         var string = message.answers.reduce(function(acc, val){
